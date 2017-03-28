@@ -2,6 +2,20 @@
 
 This is combined Splunk App effort between @jarrettp and @m_haggis.
 
+
+Current Dashboards:  
+-Sysmon Overview - Shows basic overview and usage for Sysmon events.  
+-Investigator - Allows searching of events for specific hosts, users.  
+-Network Overview  
+-File Creation Overview  
+-Process Overview  
+-Suspicious Indicators - Collection of some known IOC
+-Registry Overview
+-Network Connections
+
+Reports:
+-Over 40+ reports
+
 # Setup
 
 Deploy the [Sysmon-TA](https://splunkbase.splunk.com/app/1914/)
