@@ -1,0 +1,101 @@
+<form>
+  <label>Investigator</label>
+  <fieldset submitButton="true">
+    <input type="time" token="timesel">
+      <label>Time</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="comp">
+      <label>Computer</label>
+      <default>*</default>
+      <suffix>*</suffix>
+    </input>
+    <input type="text" token="usr">
+      <label>User</label>
+      <default>*</default>
+      <prefix>*</prefix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>`sysmon` Computer=$comp$ user=$usr$ | stats count by EventDescription</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Network Destinations</title>
+        <search>
+          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | top dest_host | rename dest_host AS "Destination"</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Network Ports</title>
+        <search>
+          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | top dest_port | rename dest_port  AS "Destination Port"</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Critical Processes</title>
+        <search>
+          <query>`sysmon` process="*\\powershell.exe" OR process="*\\msbuild.exe" OR process="*\\psexec.exe" OR process="*\\at.exe" OR process="*\\schtasks.exe" OR process="*\\net.exe" OR process="*\\vssadmin.exe" OR process="*\\utilman.exe" OR process="*\\wmic.exe" OR process="*\\mshta.exe" OR process="*\\wscript.exe" OR process="*\\cscript.exe" OR process="*\\cmd.exe" OR process="*\\whoami.exe" OR process="*\\mmc.exe" OR process="*\\systeminfo.exe" OR process="*\\csvde.exe" Computer=$comp$ user=$usr$ | stats count by process</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Parent/Child Processes</title>
+        <search>
+          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | stats values(ParentImage) by process</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Network Applcations</title>
+        <search>
+          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | stats values(dest_host) by Image</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Hashes by Image</title>
+        <search>
+          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | rex field=Hashes ".*MD5=(?&lt;MD5&gt;[A-F0-9]*),IMPHASH=(?&lt;IMPHASH&gt;[A-F0-9]*)" | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="count">15</option>
+      </table>
+    </panel>
+  </row>
+</form>

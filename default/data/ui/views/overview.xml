@@ -1,0 +1,44 @@
+<dashboard>
+  <label>Overview</label>
+  <description>High level overview of your Sysmon environment.</description>
+  <row>
+    <panel>
+      <title>Computer Count</title>
+      <single>
+        <search>
+          <query>`sysmon` | stats dc(Computer)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <table>
+        <title>Sysmon-Top EventDescription</title>
+        <search ref="Sysmon - Top EventDescription"></search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Critical Process</title>
+        <search ref="Critical Process"></search>
+      </table>
+    </panel>
+  </row>
+</dashboard>
