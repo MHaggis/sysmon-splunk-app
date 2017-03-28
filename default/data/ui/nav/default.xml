@@ -2,6 +2,7 @@
   <view name="sysmon_overview" default='true' />
   <collection label="Network Activity">
       <view name="network_overview" />
+      <view name="network_connections" />
   </collection>
   <collection label="Process Activity">
     <view name="process_overview" />
@@ -13,6 +14,7 @@
   <collection label="Investigation">
     <view name="investigator" />
     <view name="suspicious_indicators" />
+    <view name="registry_overview" />
   </collection>
   <view name="reports" />
 </nav>
