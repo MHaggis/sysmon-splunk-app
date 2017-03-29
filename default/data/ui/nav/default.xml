@@ -18,4 +18,5 @@
   </collection>
   <view name="reports" />
   <view name="alerts" />
+  <view name="search" />
 </nav>
