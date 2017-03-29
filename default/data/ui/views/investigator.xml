@@ -90,7 +90,7 @@
       <table>
         <title>Hashes by Image</title>
         <search>
-          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | rex field=Hashes ".*MD5=(?&lt;MD5&gt;[A-F0-9]*),IMPHASH=(?&lt;IMPHASH&gt;[A-F0-9]*)" | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
+          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>

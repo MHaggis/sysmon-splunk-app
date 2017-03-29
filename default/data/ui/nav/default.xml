@@ -17,4 +17,5 @@
     <view name="registry_overview" />
   </collection>
   <view name="reports" />
+  <view name="alerts" />
 </nav>
