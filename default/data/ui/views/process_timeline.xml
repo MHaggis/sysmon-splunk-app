@@ -2,7 +2,7 @@
   <label>Process Timeline</label>
   <description>Analyze events with in a given process over time</description>
   <fieldset submitButton="true">
-    <input type="text" token="proc_guid" searchWhenChanged="true">
+    <input type="text" token="logsel" searchWhenChanged="true">
       <label>LogonGuid</label>
     </input>
     <input type="time" token="timepicker">
@@ -17,7 +17,7 @@
     <panel>
       <chart>
         <search>
-          <query>`sysmon` LogonGuid="$proc_guid$" | timechart span=30m count by process limit=20</query>
+          <query>`sysmon` LogonGuid="$logsel$" | timechart span=30m count by process limit=20</query>
           <earliest>$timepicker.earliest$</earliest>
           <latest>$timepicker.latest$</latest>
         </search>
@@ -50,17 +50,17 @@
         <drilldown>
           <!-- Use set to specify the new token to be created.
                          Use any token from the page or from the click event to produce the value needed. -->
-          <set token="etype">$click.name2$</set>
+          <set token="procsel">$click.name2$</set>
         </drilldown>
       </chart>
     </panel>
   </row>
   <row>
     <panel>
-      <table id="detail" depends="$etype$">
-        <title>Event Type: $etype$</title>
+      <table id="detail" depends="$procsel$">
+        <title>Process: $procsel$</title>
         <search>
-          <query>`sysmon` LogonGuid="$proc_guid$" $etype$
+          <query>`sysmon` LogonGuid="$logsel$" $procsel$
 | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p")
 | table Time EventDescription Image CommandLine ParentImage ParentCommandLine user</query>
           <earliest>$timepicker.earliest$</earliest>
