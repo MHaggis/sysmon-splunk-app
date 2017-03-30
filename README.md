@@ -12,6 +12,8 @@ Current Dashboards:
 - Suspicious Indicators - Collection of some known IOC
 - Registry Overview
 - Network Connections
+- Process Finder - Helps find unique hash values based on percentage
+- Process Timeline - Uses LogonGuid to map timeline of processes. Allows clicking for drilldown.
 
 Reports:
 - Over 40+ reports
