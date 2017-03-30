@@ -1,0 +1,46 @@
+<form>
+  <label>Process Finder</label>
+  <description>Assists in finding rare hash/process values based on percentage</description>
+  <fieldset submitButton="true">
+    <input type="time" token="timesel">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="procsel">
+      <label>Process</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="ltpercent">
+      <label>Less than Percentage</label>
+      <default>100</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`sysmon` process="$procsel$" | dedup Computer, MD5
+| eval TIME=strftime(_time,"%m/%d/%Y %I:%M:%S %p")
+| eventstats dc(Computer) as total_host
+| stats earliest(TIME) count values(total_host) AS total_host by MD5, process
+| eval majority_percent=round((count/total_host)*100,2)
+| where majority_percent &lt; $ltpercent$
+| table MD5 process earliest(TIME) count majority_percent total_host</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">50</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -15,6 +15,8 @@
     <view name="investigator" />
     <view name="suspicious_indicators" />
     <view name="registry_overview" />
+    <view name="process_finder" />
+    <view name="process_timeline" />
   </collection>
   <view name="reports" />
   <view name="alerts" />
