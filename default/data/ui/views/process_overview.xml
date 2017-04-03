@@ -50,7 +50,8 @@
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="charting.chart">pie</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.legend.placement">none</option>
       </chart>
     </panel>
     <panel>
