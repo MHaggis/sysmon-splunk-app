@@ -11,10 +11,10 @@
   <collection label="File Activity">
     <view name="file_creation_overview" />
   </collection>
+  <view name="registry_overview" />
   <collection label="Investigation">
     <view name="investigator" />
     <view name="suspicious_indicators" />
-    <view name="registry_overview" />
     <view name="process_finder" />
     <view name="process_timeline" />
   </collection>
