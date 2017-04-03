@@ -55,12 +55,4 @@ Upon installation, Sysmon will begin logging events to the operational event log
 
 ## Sysmon configuration ##
 
-I recommend going with @SwiftOnSecurity latest config located here:
-
-https://github.com/SwiftOnSecurity/sysmon-config
-
-Additionally, other example Sysmon configs may be found [here](https://github.com/MHaggis/sysmon-dfir)
-
-# Contributing
-
-PLEASE CONTRIBUTE AND SHARE!
+Sysmon resources and example configuration files may be found [here](https://github.com/MHaggis/sysmon-dfir)
