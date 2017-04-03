@@ -1,10 +1,7 @@
 <form>
   <label>Process Timeline</label>
-  <description>Analyze events with in a given process over time</description>
+  <description>Analyze events with in a given process over time. Click LogonGuid and Processes to drilldown.</description>
   <fieldset submitButton="true">
-    <input type="text" token="logsel" searchWhenChanged="true">
-      <label>LogonGuid</label>
-    </input>
     <input type="time" token="timepicker">
       <label></label>
       <default>
@@ -15,6 +12,36 @@
   </fieldset>
   <row>
     <panel>
+      <title>LogonGuid Selector</title>
+      <input type="text" token="usrsel" searchWhenChanged="true">
+        <label>User</label>
+      </input>
+      <table>
+        <search>
+          <query>`sysmon` LogonGuid=* $usrsel$  | dedup LogonGuid | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | table Time LogonGuid user Computer</query>
+          <earliest>$timepicker.earliest$</earliest>
+          <latest>$timepicker.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <set token="guidsel">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="text" token="logsel" searchWhenChanged="true">
+        <label>LogonGuid</label>
+        <default>$guidsel$</default>
+      </input>
       <chart>
         <search>
           <query>`sysmon` LogonGuid="$logsel$" | timechart span=30m count by process limit=20</query>
@@ -48,8 +75,6 @@
         <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
         <option name="charting.legend.placement">right</option>
         <drilldown>
-          <!-- Use set to specify the new token to be created.
-                         Use any token from the page or from the click event to produce the value needed. -->
           <set token="procsel">$click.name2$</set>
         </drilldown>
       </chart>
@@ -66,8 +91,6 @@
           <earliest>$timepicker.earliest$</earliest>
           <latest>$timepicker.latest$</latest>
         </search>
-        <earliest>$timepicker.earliest$</earliest>
-        <latest>$timepicker.latest$</latest>
       </table>
     </panel>
   </row>
