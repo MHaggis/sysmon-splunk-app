@@ -1,5 +1,14 @@
-<dashboard>
+<form>
   <label>Process Watch</label>
+  <fieldset submitButton="true">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <title>Powershell Commands</title>
@@ -7,8 +16,8 @@
         <search>
           <query>`sysmon`  EventDescription="Process Create"
 Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image="C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" | stats count by CommandLine | sort -count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -27,8 +36,8 @@ Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image=
       <table>
         <search>
           <query>`sysmon`  EventDescription="Process Create" Image="C:\\Windows\\System32\\cmd.exe" | stats count by CommandLine | sort -count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -41,4 +50,4 @@ Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image=
       </table>
     </panel>
   </row>
-</dashboard>
+</form>

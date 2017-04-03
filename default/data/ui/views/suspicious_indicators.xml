@@ -1,13 +1,22 @@
-<dashboard>
+<form>
   <label>Suspicious Indicators</label>
+  <fieldset submitButton="true">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <title>User Level Injections</title>
       <event>
         <search>
           <query>`sysmon` EventCode=8 SourceImage=*temp* OR SourceImage="C:\\ProgramData\\*" OR SourceImage="C:\\Users\\*" | eval ppid=SourceImage+";"+TargetImage</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -29,8 +38,8 @@
       <table>
         <search>
           <query>`sysmon` EventCode=1 | rex field=Image "(?&lt;filename&gt;[^\\\]+)$" | eval file_length=len(filename) | where file_length &lt; 6 | table Image, filename, Computer</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -49,6 +58,8 @@
       <table>
         <search>
           <query>`sysmon` EventCode=8 TargetImage="C:\\Windows\\System32\\svchost.exe" | eval ppid=SourceImage+";"+TargetImage | rare ppid</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -67,8 +78,8 @@
       <event>
         <search>
           <query>`sysmon` EventCode=1 (Image="*\cmd.exe" OR Image="*\powershell.exe" OR Image="*\wscript.exe" OR Image="*\certutil.exe") AND (ParentImage="*\WINWORD.exe" OR ParentImage="*\EXCEL.exe" OR ParentImage="*\PowerPNT.exe")</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -84,4 +95,4 @@
       </event>
     </panel>
   </row>
-</dashboard>
+</form>

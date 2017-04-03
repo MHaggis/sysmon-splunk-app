@@ -1,13 +1,22 @@
-<dashboard>
+<form>
   <label>Process Overview</label>
+  <fieldset submitButton="true">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <title>Processes Over Time</title>
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Process Create" | timechart count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
         </search>
         <option name="charting.chart">area</option>
       </chart>
@@ -19,6 +28,8 @@
       <table>
         <search>
           <query>`sysmon`  EventDescription="Process Create" | top CommandLine</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -35,6 +46,8 @@
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Process Create" | top User</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.chart">pie</option>
@@ -45,6 +58,8 @@
       <table>
         <search>
           <query>`sysmon`  EventDescription="Process Create" | top Image</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -63,8 +78,8 @@
       <table>
         <search>
           <query>`sysmon` EventCode="1" | rex field=Hashes ".*MD5=(?&lt;MD5&gt;[A-F0-9]*),IMPHASH=(?&lt;IMPHASH&gt;[A-F0-9]*)" | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -77,4 +92,4 @@
       </table>
     </panel>
   </row>
-</dashboard>
+</form>

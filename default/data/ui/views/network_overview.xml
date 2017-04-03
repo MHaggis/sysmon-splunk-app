@@ -1,13 +1,22 @@
-<dashboard>
+<form>
   <label>Network Overview</label>
+  <fieldset submitButton="true">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <title>Network Connections Over Time</title>
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | timechart count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -42,8 +51,8 @@
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | top src_host | rename src_host AS "Source"</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.chart">pie</option>
@@ -54,8 +63,8 @@
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | top dest_host | rename dest_host AS "Destination"</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.chart">pie</option>
@@ -66,8 +75,8 @@
       <chart>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | top dest_port | rename dest_port  AS "Destination Port"</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -102,8 +111,8 @@
       <map>
         <search>
           <query>`sysmon` EventDescription="Network Connect" | iplocation dest_ip | geostats count by dest_ip</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
         </search>
         <option name="mapping.type">marker</option>
       </map>
@@ -115,8 +124,8 @@
       <table>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | top Image</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -133,8 +142,8 @@
       <table>
         <search>
           <query>`sysmon`  EventDescription="Network Connect" | rare Image</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -147,4 +156,4 @@
       </table>
     </panel>
   </row>
-</dashboard>
+</form>
