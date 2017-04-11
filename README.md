@@ -14,6 +14,7 @@ Current Dashboards:
 - Network Connections
 - Process Finder - Helps find unique hash values based on percentage
 - Process Timeline - Uses LogonGuid to map timeline of processes. Allows clicking for drilldown.
+- Sysmon hunter - Dashboard to hunt for various IOCs
 
 Reports:
 - Over 40+ reports
@@ -24,6 +25,7 @@ Alerts:
 # Setup
 
 Deploy the [Sysmon-TA](https://splunkbase.splunk.com/app/1914/)
+Deploy the [Sankey Diagram](https://splunkbase.splunk.com/app/3112/)
 
 Download and deploy this app to your Splunk Search Head.
 
