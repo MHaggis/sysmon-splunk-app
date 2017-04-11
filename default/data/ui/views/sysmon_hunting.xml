@@ -1,0 +1,297 @@
+<form>
+  <label>Hunting Dashboard</label>
+  <description>Correlate user/system/process activity</description>
+  <fieldset submitButton="true">
+    <input type="text" token="user">
+      <label>User</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="host">
+      <label>Host</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="src">
+      <label>Source IP</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="dest">
+      <label>Destination IP</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="app">
+      <label>Application</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="hash">
+      <label>Hash (MD5/SHA256)</label>
+      <default>*</default>
+    </input>
+    <input type="time" token="s_time">
+      <label></label>
+      <default>
+        <earliest>-15m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <title>Users by Computer</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" | stats values(user) by Computer</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Event Descriptions</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" | top EventDescription</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Potential attack tool used</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" user!="*SA_SecurityCenterBO" EventCode=1 | rex field=Image "[\\\/](?&lt;filename&gt;[^\\\/]*)$" | lookup tools.csv filename OUTPUT discovery_or_attack | table filename, discovery_or_attack, User, Computer | where discovery_or_attack!=""</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Critical Processes by Initiator</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" Image="*\\certutil.exe" OR Image="*\\powershell.exe" OR Image="*\\msbuild.exe" OR Image="*\\psexec.exe" OR Image="*\\at.exe" OR Image="*\\schtasks.exe" OR Image="*\\net.exe" OR Image="*\\vssadmin.exe" OR Image="*\\utilman.exe" OR Image="*\\wmic.exe" OR Image="*\\mshta.exe" OR Image="*\\wscript.exe" OR Image="*\\cscript.exe" OR Image="*\\cmd.exe" OR Image="*\\whoami.exe" OR Image="*\\mmc.exe" OR Image="*\\systeminfo.exe" OR Image="*\\csvde.exe" | stats count by Image, ParentImage, user | sort-count</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Processes with renamed filenames</title>
+        <search>
+          <query>`sysmon` EventCode=1 host="*$host$" user="*$user$" Image="*$app$" Hashes="*$hash$*" | rex field=Image "[\\\/](?&lt;filename&gt;[^\\\/]*)$" | eval filename=lower(filename)| stats dc(filename) as NumFilenames values(filename) as Filenames values(Image) as Images by MD5,SHA256 |where NumFilenames&gt;1</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Images by User and Hash</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" Image="*$app$" Hashes="*$hash$*" | stats count by Image,user,MD5,SHA256,Computer | sort-count</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <event>
+        <title>User Level Injections</title>
+        <search>
+          <query>`sysmon` EventCode=8 host="$host$" user="*$user$" SourceImage=*temp* OR SourceImage="C:\\ProgramData\\*" OR SourceImage="C:\\Users\\*" | eval ppid=SourceImage+";"+TargetImage</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">0</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.sortDirection">asc</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+      </event>
+    </panel>
+    <panel>
+      <table>
+        <title>Small Filename Length Execution</title>
+        <search>
+          <query>`sysmon` EventCode=1 host="$host$" user="*$user$" | rex field=Image "(?&lt;filename&gt;[^\\\]+)$" | eval file_length=len(filename) | where file_length &lt; 6 | table Image, filename, Computer</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>svchost Injections in the Userspace</title>
+        <search>
+          <query>`sysmon` EventCode=8 host="$host$" user="*$user$" TargetImage="C:\\Windows\\System32\\svchost.exe" | eval ppid=SourceImage+";"+TargetImage | rare ppid</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <event>
+        <title>Commands Running from Office Products</title>
+        <search>
+          <query>`sysmon` EventCode=1 host="$host$" user="*$user$" (Image="*\cmd.exe" OR Image="*\powershell.exe" OR Image="*\wscript.exe" OR Image="*\certutil.exe") AND (ParentImage="*\WINWORD.exe" OR ParentImage="*\EXCEL.exe" OR ParentImage="*\PowerPNT.exe")</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">0</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.sortDirection">asc</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+      </event>
+    </panel>
+    <panel>
+      <table>
+        <title>Possible Recon through Net command</title>
+        <search>
+          <query>'sysmon' host="$host$" user="*$user$" Image="*\\net.exe" (CommandLine="*net group*" OR CommandLine="*net localgroup*" OR CommandLine="*net user" OR CommandLine="*net view") | stats count by Computer,CommandLine, User</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Processes with renamed filenames</title>
+        <search>
+          <query>`sysmon` EventCode=1 host="$host$" user="*$user$" | rex field=Image "[\\\/](?&lt;filename&gt;[^\\\/]*)$" | eval filename=lower(filename)| stats dc(filename) as NumFilenames values(filename) as Filenames values(Image) as Images by Hashes |where NumFilenames&gt;1</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>New scheduled task created via CLI</title>
+        <search>
+          <query>'sysmon' host="$host$" user="*$user$" Image="*\\schtasks.exe" (CommandLine="*/Create*" CommandLine="*/s *" OR CommandLine="*/Run*" CommandLine="*/s *" OR CommandLine="*/Delete*" CommandLine="*/s *" OR CommandLine="*/Change*" CommandLine="*/s *") | stats count by Computer,CommandLine,user</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Invalid use of WMI</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" wmic.exe NOT management_use_1 … NOT management_use_2 NOT management_use_3</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>WMI commands executed</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" ParentImage="*\\WmiPrvSE.exe" | stats count by Computer,user ,CommandLine</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Potential use of Mimikatz</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" CommandLine="*privileges::debug*" OR CommandLine="*sekurlsa::*" OR CommandLine="*kerberos::*" OR CommandLine="*crypto::*" OR CommandLine="*lsadump::*" OR CommandLine="*process::*"</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Suspicious strings in PowerShell command</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" powershell.exe Invoke* OR IEX  OR Download* | table _time, Computer, ProcessId, Image,CommandLine, ParentProcessId,ParentImage,ParentCommandLine</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Possible Ransomware</title>
+        <search>
+          <query>`sysmon` host="$host$" user="*$user$" Image="*$app$" Hashes="*$hash$*"  [ search sourcetype="xmlwineventlog:microsoft-windows-sysmon/operational" EventDescription="File Create Time" | streamstats time_window=1m count(EventDescription) AS "new_files" | search new_files&gt;10 | fields + Image ] | stats  last(Image) as File by _time, ParentCommandLine,Hashes</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

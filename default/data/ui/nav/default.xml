@@ -13,6 +13,7 @@
   </collection>
   <view name="registry_overview" />
   <collection label="Investigation">
+    <view name="sysmon_hunting"/>
     <view name="investigator" />
     <view name="suspicious_indicators" />
     <view name="process_finder" />
