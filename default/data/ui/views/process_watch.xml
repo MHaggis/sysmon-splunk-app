@@ -15,7 +15,7 @@
       <table>
         <search>
           <query>`sysmon`  EventDescription="Process Create"
-Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image="C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" | stats count by CommandLine | sort -count</query>
+Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image="C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" | stats count by CommandLine, ParentImage | sort -count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -35,7 +35,7 @@ Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image=
       <title>CMD Commands</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" Image="C:\\Windows\\System32\\cmd.exe" | stats count by CommandLine | sort -count</query>
+          <query>`sysmon`  EventDescription="Process Create" Image="C:\\Windows\\System32\\cmd.exe" | stats count by CommandLine, ParentImage | sort -count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

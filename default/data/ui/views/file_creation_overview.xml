@@ -114,4 +114,16 @@
       </table>
     </panel>
   </row>
+  <row>
+    <panel>
+      <viz type="sankey_diagram_app.sankey_diagram">
+        <title>Processes creating file(s)</title>
+        <search>
+          <query>`sysmon` EventCode=11 | top TargetFilename by Image</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+      </viz>
+    </panel>
+  </row>  
 </form>

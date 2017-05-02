@@ -74,11 +74,11 @@
   </row>
   <row>
     <panel>
-      <title>Commands Running from Office Products</title>
+      <title>Commands Running from Office Products or Browsers</title>
       <event>
         <search>
-          <query>`sysmon` EventCode=1 (Image="*\cmd.exe" OR Image="*\powershell.exe" OR Image="*\wscript.exe" OR Image="*\certutil.exe") AND (ParentImage="*\WINWORD.exe" OR ParentImage="*\EXCEL.exe" OR ParentImage="*\PowerPNT.exe")</query>
-          <earliest>$time.earliest$</earliest>
+          <query>'sysmon' EventCode=1 ParentImage=”*\\WINWORD.EXE” OR ParentImage=”*\\OUTLOOK.EXE” OR ParentImage=”*\\EXCEL.EXE” OR ParentImage=”*\\POWERPNT.EXE” OR ParentImage=”*\\iexplore.exe” OR ParentImage=”*\\firefox.exe”” OR ParentImage=”*\\chrome.exe” AND (Image="*\\certutil.exe" OR Image="*\\powershell.exe" OR Image="*\\msbuild.exe" OR Image="*\\psexec.exe" OR Image="*\\at.exe" OR Image="*\\schtasks.exe" OR Image="*\\net.exe" OR Image="*\\vssadmin.exe" OR Image="*\\utilman.exe" OR Image="*\\wmic.exe" OR Image="*\\mshta.exe" OR Image="*\\wscript.exe" OR Image="*\\cscript.exe" OR Image="*\\cmd.exe" OR Image="*\\whoami.exe" OR Image="*\\mmc.exe" OR Image="*\\systeminfo.exe" OR Image="*\\csvde.exe") | stats count by Image, ParentImage, user, Computer | sort -count</query>
+		  <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
@@ -95,4 +95,41 @@
       </event>
     </panel>
   </row>
+<row>  
+  <panel>
+      <table>
+        <title>Possible Recon through Net command</title>
+        <search>
+          <query>'sysmon' EventCode=1  Image="*\\net.exe" (CommandLine="*net group*" OR CommandLine="*net localgroup*" OR CommandLine="*net  user" OR CommandLine="*net  view") | stats count by Computer,CommandLine, User</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+      </table>
+    </panel>
+  </row>
+<row>
+    <panel>
+      <table>
+        <title>New scheduled task created via CLI</title>
+        <search>
+          <query>'sysmon' EventCode=1  Image="*\\schtasks.exe" (CommandLine="*/Create*" CommandLine="*/s *" OR CommandLine="*/Run*" CommandLine="*/s *" OR CommandLine="*/Delete*" CommandLine="*/s *" OR CommandLine="*/Change*" CommandLine="*/s *") | stats count by Computer,CommandLine,user</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+</row>
+<row>
+    <panel>
+      <table>
+        <title>Possible Ransomware, proccess created over 10 new files</title>
+        <search>
+          <query>`sysmon`  [ search sourcetype="xmlwineventlog:microsoft-windows-sysmon/operational" EventDescription="File Create Time" | streamstats time_window=1m count(EventDescription) AS "new_files" | search new_files&amp;gt;10 | fields + Image ] | stats  last(Image) as File by _time, ParentCommandLine,Hashes</query>
+          <earliest>$s_time.earliest$</earliest>
+          <latest>$s_time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>	
 </form>
