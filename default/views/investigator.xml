@@ -1,0 +1,101 @@
+<form>
+  <label>Investigator</label>
+  <fieldset submitButton="true">
+    <input type="time" token="timesel">
+      <label>Time</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="comp">
+      <label>Computer</label>
+      <default>*</default>
+      <suffix>*</suffix>
+    </input>
+    <input type="text" token="usr">
+      <label>User</label>
+      <default>*</default>
+      <prefix>*</prefix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>`sysmon` ComputerName=$comp$ User=$usr$ | stats count by TaskCategory</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Network Destinations</title>
+        <search>
+          <query>`sysmon` TaskCategory="Network connection detected (rule: NetworkConnect)" ComputerName=$comp$ User=$usr$ | top DestinationHostname | rename DestinationHostname AS "Destination"</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Network Ports</title>
+        <search>
+          <query>`sysmon`  TaskCategory="Network connection detected (rule: NetworkConnect)" ComputerName=$comp$ User=$usr$ | top DestinationPort | rename DestinationPort  AS "Destination Port"</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Critical Processes</title>
+        <search>
+          <query>`sysmon` Image="*\\powershell.exe" OR Image="*\\msbuild.exe" OR Image="*\\psexec.exe" OR Image="*\\at.exe" OR Image="*\\schtasks.exe" OR Image="*\\net.exe" OR Image="*\\vssadmin.exe" OR Image="*\\utilman.exe" OR Image="*\\wmic.exe" OR Image="*\\mshta.exe" OR Image="*\\wscript.exe" OR Image="*\\cscript.exe" OR Image="*\\cmd.exe" OR Image="*\\whoami.exe" OR Image="*\\mmc.exe" OR Image="*\\systeminfo.exe" OR Image="*\\csvde.exe" ComputerName=$comp$ User=$usr$ | stats count by Image | sort -count</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Parent/Child Processes</title>
+        <search>
+          <query>`sysmon` EventCode="1" ComputerName=$comp$ User=$usr$  | stats values(ParentImage) by Image</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Network Applcations</title>
+        <search>
+          <query>`sysmon` TaskCategory="Network connection detected (rule: NetworkConnect)" ComputerName=$comp$ User=$usr$ | stats values(DestinationHostname) by Image</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Hashes by Image</title>
+        <search>
+          <query>`sysmon` EventCode="1" ComputerName=$comp$ User=$usr$  | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
+          <earliest>$timesel.earliest$</earliest>
+          <latest>$timesel.latest$</latest>
+        </search>
+        <option name="count">15</option>
+      </table>
+    </panel>
+  </row>
+</form>
