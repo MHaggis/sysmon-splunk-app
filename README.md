@@ -2,6 +2,10 @@
 
 Credits to @jarrettp and @m_haggis for providing the base fork of this config. Incremental changes have been made to meet my specific needs. Feel free to use or send a pull request.
 
+# Joint Contributor Credits
+
+* Gibin John (beahunt3r)
+* Vineet Bhatia (threathunting)
 
 # Setup
 
