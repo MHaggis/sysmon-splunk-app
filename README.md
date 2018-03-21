@@ -2,6 +2,11 @@
 
 This is combined Splunk App effort between @jarrettp and @m_haggis.
 
+# Joint Contributor Credits
+
+* Gibin John (beahunt3r)
+* Vineet Bhatia (threathunting)
+
 
 Current Dashboards:  
 - Sysmon Overview - Shows basic overview and usage for Sysmon events.  
@@ -23,7 +28,7 @@ Alerts:
 
 # Setup
 
-Deploy the [Sysmon-TA](https://splunkbase.splunk.com/app/1914/)
+Deploy [Sysmon-TA](https://splunkbase.splunk.com/app/1914/)
 
 Download and deploy this app to your Splunk Search Head.
 
