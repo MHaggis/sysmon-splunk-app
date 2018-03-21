@@ -2,13 +2,14 @@
 
 This is combined Splunk App effort between @jarrettp and @m_haggis.
 
-# Joint Contributor Credits
+### Joint Contributor Credits
 
 * Gibin John (beahunt3r)
 * Vineet Bhatia (threathunting)
 
+#### What is in the App:
 
-Current Dashboards:  
+##### Dashboards:  
 - Sysmon Overview - Shows basic overview and usage for Sysmon events.  
 - Investigator - Allows searching of events for specific hosts, users.  
 - Network Overview  
@@ -20,10 +21,10 @@ Current Dashboards:
 - Process Finder - Helps find unique hash values based on percentage
 - Process Timeline - Uses LogonGuid to map timeline of processes. Allows clicking for drilldown.
 
-Reports:
+##### Reports:
 - Over 40+ reports
 
-Alerts:
+##### Alerts:
 - 19 Pre-built alerts
 
 # Setup
