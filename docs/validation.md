@@ -1,5 +1,9 @@
 # Validation and release gates
 
+The [CI workflow](ci.md) automates the static/package checks and preserves the
+tested candidate and reports. It also rejects unreviewed changes to AppInspect's
+known warnings/skips. A green CI run is not Splunk runtime or Cloud approval.
+
 ## What local checks establish
 
 `python3 -m unittest discover -s tests -v` and `python3 scripts/validate_app.py`

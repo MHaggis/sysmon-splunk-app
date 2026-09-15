@@ -126,6 +126,11 @@ filters. Defaults run on initial load; time-picker changes trigger searches.
 
 ## Development and release checks
 
+[GitHub Actions CI](docs/ci.md) runs regression/config/XML checks, builds the app,
+and gates AppInspect reports on PRs and master pushes. Candidate packages and
+diagnostic reports are downloadable from each run. CI checks package/static
+behavior; the Splunk runtime acceptance checks remain a separate gate.
+
 ```sh
 python3 -m unittest discover -s tests -v
 python3 scripts/validate_app.py

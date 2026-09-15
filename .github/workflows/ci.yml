@@ -1,0 +1,100 @@
+name: Sysmon app CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Static checks and AppInspect
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Record candidate identity and validation scope
+        run: |
+          mkdir -p "$RUNNER_TEMP/ci-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/ci-evidence/tested-commit.txt"
+          echo 'Static candidate only. Splunk runtime and Cloud approval are NOT validated by this workflow.' \
+            | tee "$RUNNER_TEMP/ci-evidence/runtime-status.txt" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libmagic1 libxml2-utils
+          python -m pip install --require-hashes --only-binary=:all: --requirement .ci/build-requirements.txt
+          python -m pip install --require-hashes --no-build-isolation --requirement .ci/requirements.txt
+
+      - name: Run regression, config, XML and whitespace checks
+        run: |
+          python -m unittest discover -s tests -v 2>&1 | tee "$RUNNER_TEMP/ci-evidence/tests.log"
+          python scripts/validate_app.py 2>&1 | tee "$RUNNER_TEMP/ci-evidence/static.log"
+          xmllint --noout default/data/ui/views/*.xml default/data/ui/nav/default.xml
+          git -c core.whitespace=cr-at-eol diff --check HEAD^ HEAD
+
+      - name: Build candidate and record checksum
+        run: |
+          python scripts/package_app.py | tee "$RUNNER_TEMP/ci-evidence/package.log"
+          cp .context/dist/sysmon-splunk-app.tgz "$RUNNER_TEMP/ci-evidence/"
+          cd "$RUNNER_TEMP/ci-evidence"
+          sha256sum sysmon-splunk-app.tgz > sysmon-splunk-app.tgz.sha256
+
+      - name: Run AppInspect on the candidate
+        id: appinspect
+        run: |
+          set +e
+          splunk-appinspect inspect "$RUNNER_TEMP/ci-evidence/sysmon-splunk-app.tgz" \
+            --mode precert --max-messages all --skip-trusted-libraries-update \
+            --output-file "$RUNNER_TEMP/ci-evidence/appinspect.json" \
+            2>&1 | tee "$RUNNER_TEMP/ci-evidence/appinspect.log"
+          pipeline_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pipeline_status[0]}" > "$RUNNER_TEMP/ci-evidence/appinspect-exit-code.txt"
+          if (( pipeline_status[0] != 0 )); then exit "${pipeline_status[0]}"; fi
+          exit "${pipeline_status[1]}"
+
+      - name: Enforce AppInspect findings baseline
+        if: ${{ !cancelled() && steps.appinspect.outcome != 'skipped' }}
+        run: |
+          python scripts/check_appinspect.py "$RUNNER_TEMP/ci-evidence/appinspect.json" \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            2>&1 | tee "$RUNNER_TEMP/ci-evidence/appinspect-gate.log"
+
+      - name: Preserve candidate and diagnostic evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: static-candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ci-evidence/sysmon-splunk-app.tgz
+            ${{ runner.temp }}/ci-evidence/sysmon-splunk-app.tgz.sha256
+            ${{ runner.temp }}/ci-evidence/*.log
+            ${{ runner.temp }}/ci-evidence/appinspect.json
+            ${{ runner.temp }}/ci-evidence/tested-commit.txt
+            ${{ runner.temp }}/ci-evidence/runtime-status.txt
+            ${{ runner.temp }}/ci-evidence/appinspect-exit-code.txt
+          if-no-files-found: warn
+          retention-days: 14
