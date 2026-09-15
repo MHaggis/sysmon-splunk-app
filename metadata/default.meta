@@ -2,7 +2,7 @@
 # Application-level permissions
 
 []
-access = read : [ * ], write : [ admin, power ]
+access = read : [ * ], write : [ admin, sc_admin, power ]
 
 ### EVENT TYPES
 
@@ -13,7 +13,7 @@ export = system
 ### PROPS
 
 [props]
-export = system
+export = none
 
 
 ### TRANSFORMS

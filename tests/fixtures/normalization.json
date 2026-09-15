@@ -1,0 +1,32 @@
+[
+  {
+    "name": "current XML fields and CIM command line",
+    "fields": {"Computer": "endpoint-a", "host": "collector", "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "process": "powershell.exe -NoProfile", "CommandLine": "powershell.exe -NoProfile", "User": "LAB\\alice", "DestinationHostname": "dns.example", "DestinationIp": "192.0.2.53", "DestinationPort": "53", "Protocol": "udp"},
+    "expected": {"sysmon_computer": "endpoint-a", "sysmon_process_name": "powershell.exe", "sysmon_process_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "sysmon_user": "LAB\\alice", "sysmon_dest_host": "dns.example", "sysmon_dest_ip": "192.0.2.53", "sysmon_dest_port": "53", "sysmon_protocol": "udp"}
+  },
+  {
+    "name": "legacy computer and uppercase IP variant",
+    "fields": {"ComputerName": "endpoint-b", "Image": "C:\\Program Files\\Example\\agent.exe", "user": "LAB\\bob", "DestinationIP": "203.0.113.10", "dest_port": "443", "protocol": "tcp"},
+    "expected": {"sysmon_computer": "endpoint-b", "sysmon_process_name": "agent.exe", "sysmon_user": "LAB\\bob", "sysmon_dest_host": "203.0.113.10", "sysmon_dest_ip": "203.0.113.10", "sysmon_dest_port": "443", "sysmon_protocol": "tcp"}
+  },
+  {
+    "name": "placeholder hostname falls back to native IP",
+    "fields": {"Computer": "endpoint-c", "DestinationHostname": "-", "DestinationIp": "2001:db8::1", "SourceHostname": "-", "SourceIp": "192.0.2.4", "ParentImage": "C:\\Windows\\System32\\services.exe"},
+    "expected": {"sysmon_computer": "endpoint-c", "sysmon_dest_host": "2001:db8::1", "sysmon_src_host": "192.0.2.4", "sysmon_parent_process_name": "services.exe", "sysmon_process_name": null}
+  },
+  {
+    "name": "empty hostname falls back to IP",
+    "fields": {"DestinationHostname": "", "DestinationIp": "192.0.2.8", "Image": "\\\\server\\share\\cmd.exe"},
+    "expected": {"sysmon_dest_host": "192.0.2.8", "sysmon_process_name": "cmd.exe", "sysmon_computer": null}
+  },
+  {
+    "name": "never substitute collector or command line",
+    "fields": {"host": "wec-collector", "process": "cmd.exe /c whoami", "CommandLine": "cmd.exe /c whoami"},
+    "expected": {"sysmon_computer": null, "sysmon_process_name": null, "sysmon_process_path": null}
+  },
+  {
+    "name": "native endpoint and path take precedence",
+    "fields": {"Computer": "event-computer", "ComputerName": "other-alias", "host": "collector", "Image": "cmd.exe", "process": "cmd.exe /c something", "dest_ip": "198.51.100.2", "dest_host": "legacy.example"},
+    "expected": {"sysmon_computer": "event-computer", "sysmon_process_name": "cmd.exe", "sysmon_process_path": "cmd.exe", "sysmon_dest_host": "legacy.example", "sysmon_dest_ip": "198.51.100.2"}
+  }
+]

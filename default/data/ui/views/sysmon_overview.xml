@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Sysmon Overview</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -108,7 +108,7 @@
       <title>Events by Host</title>
       <table>
         <search>
-          <query>`sysmon` | stats count by Computer | sort - count</query>
+          <query>`sysmon` | stats count by sysmon_computer | sort - count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -126,7 +126,7 @@
       <title>Events Count by User</title>
       <table>
         <search>
-          <query>`sysmon` | stats count by User | sort - count</query>
+          <query>`sysmon` | stats count by sysmon_user | rename sysmon_user AS User | sort - count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

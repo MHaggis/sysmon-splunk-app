@@ -1,4 +1,4 @@
-<dashboard>
+<dashboard version="1.1">
   <label>Overview</label>
   <description>High level overview of your Sysmon environment.</description>
   <row>
@@ -6,7 +6,7 @@
       <title>Computer Count</title>
       <single>
         <search>
-          <query>`sysmon` | stats dc(Computer)</query>
+          <query>`sysmon` | stats dc(sysmon_computer)</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>

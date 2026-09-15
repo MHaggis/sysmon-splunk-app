@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Registry Overview</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -14,7 +14,7 @@
       <title>Registry Events Over Time</title>
       <chart>
         <search>
-          <query>`sysmon` EventCode=13 | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | timechart count</query>
+          <query>`sysmon` EventCode=13 | timechart count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -50,7 +50,7 @@
       <title>Top Processes</title>
       <table>
         <search>
-          <query>`sysmon` EventCode=13 | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | top Image</query>
+          <query>`sysmon` EventCode=13 | top limit=20 sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -68,7 +68,7 @@
       <title>Top Registry Objects</title>
       <table>
         <search>
-          <query>`sysmon` EventCode=13 | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | top TargetObject</query>
+          <query>`sysmon` EventCode=13 | top limit=20 TargetObject</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

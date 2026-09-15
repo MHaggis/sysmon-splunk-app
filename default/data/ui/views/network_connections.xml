@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Network Connections</label>
-  <fieldset submitButton="true">
-    <input type="time" token="timsel">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="timsel" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -29,7 +29,7 @@
     <panel>
       <table>
         <search>
-          <query>`sysmon` EventCode=3 Image="$imgsel$" protocol="$protosel$" dest_port="$portsel$" "$destinations$" | eval Destination=coalesce(dest_host,dest_ip) | stats count, values(Destination) AS "Destinations", values(dest_port) AS "Ports", values(protocol) AS "Protocols" by Image | fields Image Destinations Ports Protocols count</query>
+          <query>`sysmon` EventCode=3 sysmon_process_path=$imgsel|s$ sysmon_protocol=$protosel|s$ sysmon_dest_port=$portsel|s$ (sysmon_dest_host=$destinations|s$ OR sysmon_dest_ip=$destinations|s$) | stats count, values(sysmon_dest_host) AS "Destinations", values(sysmon_dest_port) AS "Ports", values(sysmon_protocol) AS "Protocols" by sysmon_process_path | rename sysmon_process_path AS Image | fields Image Destinations Ports Protocols count</query>
           <earliest>$timsel.earliest$</earliest>
           <latest>$timsel.latest$</latest>
           <sampleRatio>1</sampleRatio>
