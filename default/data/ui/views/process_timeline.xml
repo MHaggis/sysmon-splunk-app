@@ -1,8 +1,8 @@
-<form>
+<form version="1.1">
   <label>Process Timeline</label>
-  <description>Analyze events with in a given process over time. Click LogonGuid and Processes to drilldown.</description>
-  <fieldset submitButton="true">
-    <input type="time" token="timepicker">
+  <description>Select a LogonGuid, then click an executable series to inspect its process creation events. The chart shows the top 20 executable names.</description>
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="timepicker" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -15,10 +15,11 @@
       <title>LogonGuid Selector</title>
       <input type="text" token="usrsel" searchWhenChanged="true">
         <label>User</label>
+        <default>*</default>
       </input>
       <table>
         <search>
-          <query>`sysmon` LogonGuid=* $usrsel$  | dedup LogonGuid | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | table Time LogonGuid user Computer</query>
+          <query>`sysmon` EventCode=1 LogonGuid=* sysmon_user=$usrsel|s$ | dedup LogonGuid | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p") | table Time LogonGuid sysmon_user sysmon_computer | rename sysmon_user AS User</query>
           <earliest>$timepicker.earliest$</earliest>
           <latest>$timepicker.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -31,7 +32,11 @@
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
         <drilldown>
-          <set token="guidsel">$click.value2$</set>
+          <condition field="LogonGuid">
+            <set token="form.logsel">$click.value2$</set>
+            <set token="logsel">$click.value2$</set>
+            <unset token="procsel"></unset>
+          </condition>
         </drilldown>
       </table>
     </panel>
@@ -40,11 +45,13 @@
     <panel>
       <input type="text" token="logsel" searchWhenChanged="true">
         <label>LogonGuid</label>
-        <default>$guidsel$</default>
+        <change>
+          <unset token="procsel"></unset>
+        </change>
       </input>
       <chart>
         <search>
-          <query>`sysmon` LogonGuid="$logsel$" | timechart span=30m count by process limit=20</query>
+          <query>`sysmon` EventCode=1 LogonGuid=$logsel|s$ | timechart span=30m count by sysmon_process_name limit=20 useother=f usenull=f</query>
           <earliest>$timepicker.earliest$</earliest>
           <latest>$timepicker.latest$</latest>
         </search>
@@ -56,7 +63,6 @@
         <option name="charting.axisTitleY.visibility">visible</option>
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.maximumNumber">10</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.enabled">0</option>
         <option name="charting.axisY2.scale">inherit</option>
@@ -85,9 +91,10 @@
       <table id="detail" depends="$procsel$">
         <title>Process: $procsel$</title>
         <search>
-          <query>`sysmon` LogonGuid="$logsel$" $procsel$
+          <query>`sysmon` EventCode=1 LogonGuid=$logsel|s$ sysmon_process_name=$procsel|s$
 | eval Time=strftime(_time,"%m/%d/%Y %I:%M:%S %p")
-| table Time EventDescription Image CommandLine ParentImage ParentCommandLine user</query>
+| table Time EventDescription Image CommandLine ParentImage ParentCommandLine sysmon_user
+| rename sysmon_user AS User</query>
           <earliest>$timepicker.earliest$</earliest>
           <latest>$timepicker.latest$</latest>
         </search>

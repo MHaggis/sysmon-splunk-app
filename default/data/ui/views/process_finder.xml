@@ -1,8 +1,8 @@
-<form>
+<form version="1.1">
   <label>Process Finder</label>
-  <description>Assists in finding rare hash/process values based on percentage</description>
-  <fieldset submitButton="true">
-    <input type="time" token="timesel">
+  <description>Find rare MD5/image-path combinations. Percentage is distinct hosts for that hash/path divided by hosts with MD5 in the selected image-path population and time range.</description>
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="timesel" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -10,7 +10,7 @@
       </default>
     </input>
     <input type="text" token="procsel">
-      <label>Process</label>
+      <label>Image path (wildcards allowed)</label>
       <default>*</default>
     </input>
     <input type="text" token="ltpercent">
@@ -22,13 +22,15 @@
     <panel>
       <table>
         <search>
-          <query>`sysmon` process="$procsel$" | dedup Computer, MD5
-| eval TIME=strftime(_time,"%m/%d/%Y %I:%M:%S %p")
-| eventstats dc(Computer) as total_host
-| stats earliest(TIME) count values(total_host) AS total_host by MD5, process
+          <query>`sysmon` EventCode=1 MD5=* sysmon_process_path=$procsel|s$
+| eventstats dc(sysmon_computer) AS total_host
+| stats dc(sysmon_computer) AS count earliest(_time) AS first_seen values(total_host) AS total_host by MD5 sysmon_process_path
 | eval majority_percent=round((count/total_host)*100,2)
-| where majority_percent &lt; $ltpercent$
-| table MD5 process earliest(TIME) count majority_percent total_host</query>
+| where majority_percent &lt; tonumber($ltpercent|s$)
+| sort 0 majority_percent MD5 sysmon_process_path
+| eval first_seen=strftime(first_seen,"%m/%d/%Y %I:%M:%S %p")
+| rename sysmon_process_path AS Image
+| table MD5 Image first_seen count majority_percent total_host</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
           <sampleRatio>1</sampleRatio>

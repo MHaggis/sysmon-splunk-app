@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>File Creation Overview</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -50,7 +50,7 @@
       <title>Top Files Created</title>
       <table>
         <search>
-          <query>`sysmon` EventCode=11 | top TargetFilename</query>
+          <query>`sysmon` EventCode=11 | top limit=20 TargetFilename</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -63,7 +63,7 @@
       <title>Top Systems</title>
       <chart>
         <search>
-          <query>`sysmon` EventCode=11 | top Computer</query>
+          <query>`sysmon` EventCode=11 | top limit=20 sysmon_computer</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -99,7 +99,7 @@
       <title>Top File Creation Processes</title>
       <table>
         <search>
-          <query>`sysmon` EventCode=11 | top Image</query>
+          <query>`sysmon` EventCode=11 | top limit=20 sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

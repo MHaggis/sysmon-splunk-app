@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Network Overview</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -14,7 +14,7 @@
       <title>Network Connections Over Time</title>
       <chart>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | timechart count</query>
+          <query>`sysmon` EventCode=3 | timechart count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -50,7 +50,7 @@
       <title>Top Source Hosts</title>
       <chart>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | top src_host | rename src_host AS "Source"</query>
+          <query>`sysmon` EventCode=3 | top limit=20 sysmon_src_host | rename sysmon_src_host AS "Source"</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -62,7 +62,7 @@
       <title>Top Destinations</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | top dest_host | rename dest_host AS "Destination"</query>
+          <query>`sysmon` EventCode=3 | top limit=20 sysmon_dest_host | rename sysmon_dest_host AS "Destination"</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -73,7 +73,7 @@
       <title>Top Destination Ports</title>
       <chart>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | top dest_port | rename dest_port  AS "Destination Port"</query>
+          <query>`sysmon` EventCode=3 | top limit=20 sysmon_dest_port | rename sysmon_dest_port AS "Destination Port"</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -109,7 +109,7 @@
       <title>Destination Locations</title>
       <map>
         <search>
-          <query>`sysmon` EventDescription="Network Connect" | iplocation dest_ip | geostats count by dest_ip</query>
+          <query>`sysmon` EventCode=3 | iplocation sysmon_dest_ip | geostats count by sysmon_dest_ip</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -122,7 +122,7 @@
       <title>Top Applications</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | top Image</query>
+          <query>`sysmon` EventCode=3 | top limit=20 sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -140,7 +140,7 @@
       <title>Rare Applications</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" | rare Image</query>
+          <query>`sysmon` EventCode=3 | rare limit=20 sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

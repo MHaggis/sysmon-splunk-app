@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Process Overview</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -14,7 +14,7 @@
       <title>Processes Over Time</title>
       <chart>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" | timechart count</query>
+          <query>`sysmon` EventCode=1 | timechart count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -27,7 +27,7 @@
       <title>Top Command Line</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" | top CommandLine</query>
+          <query>`sysmon` EventCode=1 | top limit=20 CommandLine</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -45,7 +45,7 @@
       <title>Top Process Creators</title>
       <chart>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" | top User</query>
+          <query>`sysmon` EventCode=1 | top limit=20 sysmon_user | rename sysmon_user AS User</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -58,7 +58,7 @@
       <title>Top Images</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" | top Image</query>
+          <query>`sysmon` EventCode=1 | top limit=20 sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -78,7 +78,7 @@
       <title>Hashes by Image</title>
       <table>
         <search>
-          <query>`sysmon` EventCode="1" | rex field=Hashes ".*MD5=(?&lt;MD5&gt;[A-F0-9]*),IMPHASH=(?&lt;IMPHASH&gt;[A-F0-9]*)" | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
+          <query>`sysmon` EventCode=1 MD5=* | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>

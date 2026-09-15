@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Investigator</label>
-  <fieldset submitButton="true">
-    <input type="time" token="timesel">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="timesel" searchWhenChanged="true">
       <label>Time</label>
       <default>
         <earliest>-24h@h</earliest>
@@ -23,7 +23,7 @@
     <panel>
       <chart>
         <search>
-          <query>`sysmon` Computer=$comp$ user=$usr$ | stats count by EventDescription</query>
+          <query>`sysmon` sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | stats count by EventDescription</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -34,7 +34,7 @@
       <chart>
         <title>Network Destinations</title>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | top dest_host | rename dest_host AS "Destination"</query>
+          <query>`sysmon` EventCode=3 sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | top limit=20 sysmon_dest_host | rename sysmon_dest_host AS "Destination"</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -45,7 +45,7 @@
       <chart>
         <title>Network Ports</title>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | top dest_port | rename dest_port  AS "Destination Port"</query>
+          <query>`sysmon` EventCode=3 sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | top limit=20 sysmon_dest_port | rename sysmon_dest_port AS "Destination Port"</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -58,7 +58,7 @@
       <table>
         <title>Critical Processes</title>
         <search>
-          <query>`sysmon` process="*\\powershell.exe" OR process="*\\msbuild.exe" OR process="*\\psexec.exe" OR process="*\\at.exe" OR process="*\\schtasks.exe" OR process="*\\net.exe" OR process="*\\vssadmin.exe" OR process="*\\utilman.exe" OR process="*\\wmic.exe" OR process="*\\mshta.exe" OR process="*\\wscript.exe" OR process="*\\cscript.exe" OR process="*\\cmd.exe" OR process="*\\whoami.exe" OR process="*\\mmc.exe" OR process="*\\systeminfo.exe" OR process="*\\csvde.exe" Computer=$comp$ user=$usr$ | stats count by process</query>
+          <query>`sysmon` EventCode=1 (sysmon_process_name="powershell.exe" OR sysmon_process_name="msbuild.exe" OR sysmon_process_name="psexec.exe" OR sysmon_process_name="at.exe" OR sysmon_process_name="schtasks.exe" OR sysmon_process_name="net.exe" OR sysmon_process_name="vssadmin.exe" OR sysmon_process_name="utilman.exe" OR sysmon_process_name="wmic.exe" OR sysmon_process_name="mshta.exe" OR sysmon_process_name="wscript.exe" OR sysmon_process_name="cscript.exe" OR sysmon_process_name="cmd.exe" OR sysmon_process_name="whoami.exe" OR sysmon_process_name="mmc.exe" OR sysmon_process_name="systeminfo.exe" OR sysmon_process_name="csvde.exe") sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | stats count by sysmon_process_name | rename sysmon_process_name AS Process</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -68,7 +68,7 @@
       <table>
         <title>Parent/Child Processes</title>
         <search>
-          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | stats values(ParentImage) by process</query>
+          <query>`sysmon` EventCode=1 sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | stats values(ParentImage) by sysmon_process_name | rename sysmon_process_name AS Process</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -78,9 +78,9 @@
   <row>
     <panel>
       <table>
-        <title>Network Applcations</title>
+        <title>Network Applications</title>
         <search>
-          <query>`sysmon`  EventDescription="Network Connect" Computer=$comp$ user=$usr$ | stats values(dest_host) by Image</query>
+          <query>`sysmon` EventCode=3 sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | stats values(sysmon_dest_host) AS Destinations by sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>
@@ -90,7 +90,7 @@
       <table>
         <title>Hashes by Image</title>
         <search>
-          <query>`sysmon` EventCode="1" Computer=$comp$ user=$usr$  | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by Image</query>
+          <query>`sysmon` EventCode=1 MD5=* sysmon_computer=$comp|s$ sysmon_user=$usr|s$ | stats dc(MD5) as numhashes, values(MD5) AS "MD5 Hash" by sysmon_process_path | rename sysmon_process_path AS Image</query>
           <earliest>$timesel.earliest$</earliest>
           <latest>$timesel.latest$</latest>
         </search>

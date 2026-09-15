@@ -1,7 +1,7 @@
-<form>
+<form version="1.1">
   <label>Process Watch</label>
-  <fieldset submitButton="true">
-    <input type="time" token="time">
+  <fieldset autoRun="true" submitButton="true">
+    <input type="time" token="time" searchWhenChanged="true">
       <label></label>
       <default>
         <earliest>-24h@h</earliest>
@@ -14,8 +14,8 @@
       <title>Powershell Commands</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Process Create"
-Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image="C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" | stats count by CommandLine | sort -count</query>
+          <query>`sysmon` EventCode=1
+(sysmon_process_path="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR sysmon_process_path="C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe") | stats count by CommandLine | sort -count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -35,7 +35,7 @@ Image="C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe" OR Image=
       <title>CMD Commands</title>
       <table>
         <search>
-          <query>`sysmon`  EventDescription="Process Create" Image="C:\\Windows\\System32\\cmd.exe" | stats count by CommandLine | sort -count</query>
+          <query>`sysmon` EventCode=1 sysmon_process_path="C:\\Windows\\System32\\cmd.exe" | stats count by CommandLine | sort -count</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
