@@ -16,3 +16,21 @@ updates:
     groups:
       appinspect-dependencies:
         patterns: ['*']
+    # AppInspect 4.3.1 fixes these libraries to the versions/ranges below.
+    # Keep Dependabot focused on independently updatable dependencies until
+    # AppInspect itself is intentionally upgraded and re-baselined.
+    ignore:
+      - dependency-name: beautifulsoup4
+        versions: ['> 4.10.0']
+      - dependency-name: chardet
+        versions: ['> 3.0.4']
+      - dependency-name: croniter
+        versions: ['>= 2.0.0']
+      - dependency-name: lxml
+        versions: ['>= 6.0.0']
+      - dependency-name: packaging-legacy
+        versions: ['> 23.0']
+      - dependency-name: python-magic
+        versions: ['> 0.4.24']
+      - dependency-name: structlog
+        versions: ['> 24.4.0']
